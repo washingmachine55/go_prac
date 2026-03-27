@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -14,6 +15,7 @@ import (
 )
 
 var logger *log.Logger
+const sepLine string = "===========================================================\n"
 
 func loggerInit() {
 	logger = log.NewWithOptions(os.Stderr, log.Options{
@@ -87,13 +89,26 @@ func dbCalls(db *sql.DB) {
 	// fmt.Printf("%s",result)
 }
 
-
-
 func main() {
 	loggerInit();
 	// DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME := loadEnv();
 	// db := dbInit(DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME)
 	// dbCalls(db)
-	ExerciesArraysAndSlices()
+	// ExercisesArraysAndSlices()
+	// xyz();
+	client := supabaseClient();
+	data, _, err := client.From("tasks").Select("*", "exact", false).Execute()
+	if err != nil {
+		logger.Fatal(err)
+	}
+	var res []Tasks
+
+	err = json.Unmarshal(data, &res);
+	encodedJson, err := json.Marshal(&res);
+	if err != nil {
+		logger.Fatal(err)
+	}
+	
+	fmt.Fprint(os.Stdout, string(encodedJson))
 	os.Exit(1)
 }
